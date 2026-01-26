@@ -2,7 +2,14 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Checkout') {
+            steps {
+                git branch: 'main',
+                    url: 'https://github.com/kirank02072002-boop/jenkins-aws-ci-cd.git'
+            }
+        }
+
+        stage('Build Docker Image') {
             steps {
                 sh 'docker build -t demo-app .'
             }
@@ -11,9 +18,13 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                  docker stop web || true
-                  docker rm web || true
-                  docker run -d -p 80:80 --name web demo-app
+                docker stop demo-app || true
+                docker rm demo-app || true
+
+                docker run -d \
+                  --name demo-app \
+                  -p 8081:80 \
+                  demo-app
                 '''
             }
         }
